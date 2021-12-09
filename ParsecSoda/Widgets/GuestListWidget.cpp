@@ -72,6 +72,7 @@ void GuestListWidget::renderOnlineGuests()
     static size_t popupIndex;
     static string name;
     static uint32_t userID;
+    static ParsecMetrics metrics;
     static ImVec2 cursor;
 
     // Guests
@@ -85,6 +86,7 @@ void GuestListWidget::renderOnlineGuests()
     {
         name = _guests[i].name;
         userID = _guests[i].userID;
+        metrics = _guests[i].metrics;
 
         filterTextStr = _filterText;
         if (!filterTextStr.empty())
@@ -156,11 +158,34 @@ void GuestListWidget::renderOnlineGuests()
 
         cursor = ImGui::GetCursorPos();
         ImGui::BeginGroup();
-        AppStyle::pushLabel();
-        ImGui::TextWrapped("(# %d)\t", userID);
-        AppStyle::pop();
+        //AppStyle::pushLabel();
+        if (_guests[i].congested)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.75f, 0.16f, 0.28f, 1.00f));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.00f, 0.47f, 0.80f, 1.00f));
+        }
+        if (metrics.packetsSent > 60)
+        {
+            ImGui::Text("%.0fms  B:%.1f  D:%u/%.1f  E:%.1f  N:%u/%u",
+                metrics.networkLatency,
+                metrics.bitrate,
+                metrics.queuedFrames,
+                metrics.decodeLatency,
+                metrics.encodeLatency,
+                metrics.slowRTs,
+                metrics.fastRTs
+            );
+        }
+        else {
+            ImGui::Text("-");
+        }
+        //AppStyle::pop();
+        ImGui::PopStyleColor();
         AppStyle::pushInput();
-        ImGui::TextWrapped(name.c_str());
+        ImGui::Text((name +" #"+ to_string(userID)).c_str());
         AppStyle::pop();
         ImGui::Dummy(ImVec2(0.0f, 5.0f));
         ImGui::EndGroup();

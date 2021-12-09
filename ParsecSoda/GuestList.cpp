@@ -13,7 +13,9 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 			(
 				guests[i].name,
 				guests[i].userID,
-				guests[i].id
+				guests[i].id,
+				guests[i].metrics[0],
+				false
 			)
 		);
 
@@ -27,6 +29,29 @@ void GuestList::setGuests(ParsecGuest* guests, int guestCount)
 vector<Guest>& GuestList::getGuests()
 {
     return _guests;
+}
+
+void GuestList::updateMetrics(ParsecGuest* guests, int guestCount)
+{
+	for (size_t mi = 0; mi < guestCount; mi++)
+	{
+		vector<Guest>::iterator i;
+		for (i = _guests.begin(); i != _guests.end(); ++i)
+		{
+			if ((*i).id == guests[mi].id)
+			{
+				if (guests[mi].metrics[0].fastRTs > (*i).metrics.fastRTs || guests[mi].metrics[0].slowRTs > (*i).metrics.slowRTs)
+				{
+					(*i).congested = true;
+				}
+				else
+				{
+					(*i).congested = false;
+				}
+				(*i).metrics = guests[mi].metrics[0];
+			}
+		}
+	}
 }
 
 void GuestList::clear()
